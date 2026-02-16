@@ -1,0 +1,5 @@
+outputs/models/*.pth
+outputs/models/*.pt
+*.dcm
+CTs/
+__pycache__/
