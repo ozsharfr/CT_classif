@@ -62,17 +62,32 @@ def save_df_hist_pdf(df, output_dir, bins=50):
 
 
 def generate_hu_complete_hist(all_hu, output_dir):
-    """
-    Generate and save complete HU histogram.
-    
-    Args:
-        all_hu: Dictionary of HU values and their counts
-        output_dir: Output directory
-    """
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, "hu_histogram.png")
-    vv = 10 * pd.Series(all_hu) / np.min(list(all_hu.values()))
-    pd.Series([[i] * int(v) for i, v in vv.items()]).explode().hist(bins=50)
+
+    hu_series = pd.Series(all_hu)
+    values = hu_series.index.astype(float)
+    weights = hu_series.values.astype(float)
+
+    # Weighted statistics
+    weighted_mean = np.average(values, weights=weights)
+
+    sorted_idx = np.argsort(values)
+    sorted_vals = values[sorted_idx]
+    sorted_weights = weights[sorted_idx]
+    cumulative = np.cumsum(sorted_weights) / sorted_weights.sum()
+    p5  = sorted_vals[np.searchsorted(cumulative, 0.05)]
+    p95 = sorted_vals[np.searchsorted(cumulative, 0.95)]
+
+    plt.figure(figsize=(10, 5))
+    plt.hist(np.clip(values, a_min=values.min(), a_max=4000), bins=50, weights=weights, color='steelblue', alpha=0.8)
+    plt.axvline(weighted_mean, color='red',    linestyle='--', linewidth=1.5, label=f'Mean: {weighted_mean:.1f}')
+    plt.axvline(p5,           color='orange',  linestyle=':',  linewidth=1.5, label=f'5th pct: {p5:.1f}')
+    plt.axvline(p95,          color='orange',  linestyle=':',  linewidth=1.5, label=f'95th pct: {p95:.1f}')
+    plt.xlabel("HU Value")
+    plt.ylabel("Count")
+    plt.title("HU Histogram")
+    plt.legend()
     plt.tight_layout()
     plt.savefig(out_path)
     plt.close()
@@ -123,8 +138,9 @@ def save_cluster_report_pdf(df, Xz, hu_img_func, win01_func,
                 rep_idx = idx[np.argmin(np.linalg.norm(Xc - center, axis=1))]
                 row = df.loc[rep_idx]
                 _, hu = hu_img_func(row["path"])
-                img = win01_func(hu)
-
+                # Manually apply brain windowing for visualization (instead of win01_func) 
+                x = np.clip(hu, -40, 40)
+                img = (x - (-40)) / (40 - (-40) + 1e-6)
                 axes[i].imshow(img, cmap="gray", vmin=0, vmax=1)
                 axes[i].set_title(
                     f"Cluster {c}\nLabel={lbl} | Size={val} | "

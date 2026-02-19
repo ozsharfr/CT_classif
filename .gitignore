@@ -3,3 +3,6 @@ outputs/models/*.pt
 *.dcm
 CTs/
 __pycache__/
+.venv
+outputs
+

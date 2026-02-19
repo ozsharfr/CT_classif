@@ -67,8 +67,8 @@ def extract_basic_features(paths):
             mean=float(vals.mean()),
             std=float(vals.std())
         ))
-
-        for k, v in pd.Series(vals).value_counts().to_dict().items():
+        vals1 = hu[mask] if mask.any() else hu.ravel()
+        for k, v in pd.Series(vals1).value_counts().to_dict().items():
             all_hu[k] = all_hu.get(k, 0) + v
 
     return pd.DataFrame(rows), all_hu

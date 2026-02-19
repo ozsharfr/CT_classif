@@ -25,7 +25,7 @@ from torchvision import models
 from sklearn.model_selection import train_test_split
 
 from config import (
-    EDA_CSV, BATCH_SIZE, MAX_EPOCHS, LR, SEED, DEVICE,
+    EDA_CSV, BATCH_SIZE, MAX_EPOCHS, LR, FREEZE_LAYERS, SEED, DEVICE,
     VALIDATION_SIZE, TEST_SIZE,
     EARLY_STOPPING_PATIENCE, EARLY_STOPPING_METRIC, EARLY_STOPPING_MIN_DELTA,
     MODEL_CHECKPOINT_DIR, SAVE_BEST_MODEL, SAVE_FINAL_MODEL, SAVE_TRAINING_HISTORY,
@@ -113,6 +113,14 @@ def build_model(train_df):
         tuple: (model, loss_fn, optimizer)
     """
     model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    # Freeze all layers except the final fully connected layer
+    if FREEZE_LAYERS:
+        layers_to_freeze = [model.conv1, model.bn1, model.layer1, model.layer2, model.layer3]
+    
+        for layer in layers_to_freeze:
+            for param in layer.parameters():
+                param.requires_grad = False
+
     model.fc = nn.Linear(model.fc.in_features, 1)
     model = model.to(DEVICE)
 

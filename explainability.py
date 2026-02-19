@@ -132,7 +132,10 @@ def load_dicom_for_display(path, dicom_to_hu_func, win01_func,
     """
     ds = pydicom.dcmread(path, force=True)
     hu = dicom_to_hu_func(ds)
-    img01 = win01_func(hu)
+    # Manually apply brain windowing for visualization (instead of win01_func) 
+    x = np.clip(hu, -40, 40)
+    img01 = (x - (-40)) / (40 - (-40) + 1e-6)
+
     img01_cropped = apply_center_crop(img01, frac=frac)
     img01_resized = cv2.resize(img01_cropped, (out_size, out_size), 
                                interpolation=cv2.INTER_LINEAR)

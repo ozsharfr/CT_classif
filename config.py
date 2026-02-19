@@ -19,15 +19,15 @@ GRADCAM_DIR = "./outputs/gradcam"
 # ==============================
 # Brain Window (NCCT Standard)
 # ==============================
-WL = 40.0  # Window level
-WW = 80.0  # Window width
+WL = 0.0  # Window level
+WW = 1e6   # Window width- set to 80, since a very large number caused poor contrast
 WMIN = WL - WW/2
 WMAX = WL + WW/2
 
 # ==============================
 # Image Preprocessing
 # ==============================
-FRAC_CROP = 0.8  # Center crop fraction (0.75-0.95)
+FRAC_CROP = 0.9  # Center crop fraction (0.75-0.95)
 INPUT_SIZE = 224  # Model input size (128/224/256/384/512)
 
 # ==============================
@@ -108,6 +108,7 @@ BATCH_SIZE = 32  # Reduce if GPU memory error
 MAX_EPOCHS = 50  # Maximum training epochs (early stopping may stop before)
 LR = 1e-4  # Learning rate
 SEED = 42  # Random seed for reproducibility
+FREEZE_LAYERS = False  # Freeze all layers except final fully connected layer
 
 # Train/Val/Test split
 VALIDATION_SIZE = 0.2  # 20% for validation
